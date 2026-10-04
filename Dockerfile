@@ -60,12 +60,16 @@ ENV TORCH_CUDA_ARCH_LIST=${TORCH_CUDA_ARCH_LIST} \
     MAX_JOBS=${MAX_JOBS} \
     EXT_PARALLEL=1 \
     NVCC_APPEND_FLAGS="--threads 2"
+COPY files/patch_sage.py /tmp/patch_sage.py
+# 2.x 빌드에 실패해도 이미지 빌드는 멈추지 않고 1.x(Triton 기반)로 대체
 RUN git clone --depth 1 https://github.com/thu-ml/SageAttention.git /tmp/sage \
     && cd /tmp/sage \
-    && pip install . --no-build-isolation \
-    && rm -rf /tmp/sage
-# 만약 위 단계에서 빌드가 계속 실패하면, 위 RUN을 지우고 아래 한 줄(Triton 기반 1.x)로 대체:
-# RUN uv pip install -c /opt/constraints.txt sageattention==1.0.6
+    && python /tmp/patch_sage.py \
+    && ( pip install . --no-build-isolation \
+         || ( echo "!!!!! SAGE2_BUILD_FAILED: SageAttention 2 빌드 실패, 1.x로 대체합니다 !!!!!" \
+              && uv pip install -c /opt/constraints.txt sageattention==1.0.6 ) ) \
+    && python -c "import importlib.metadata as m; print('SageAttention 설치 버전:', m.version('sageattention'))" \
+    && rm -rf /tmp/sage /tmp/patch_sage.py
 
 ############################################################
 # 2단계: 실행용 (가벼운 runtime 이미지)
