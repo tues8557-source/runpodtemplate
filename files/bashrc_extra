@@ -1,0 +1,15 @@
+
+# ---- ComfyUI RunPod 설정 ----
+[ -f /etc/rp_env.sh ] && source /etc/rp_env.sh
+
+# 터미널에서 pip를 쓰면 ComfyUI 환경에 설치되도록 자동 활성화
+export VIRTUAL_ENV_DISABLE_PROMPT=1
+source /opt/venv/bin/activate
+
+# 프롬프트: 사용자@runpod:현재경로$
+export PS1='\[\e[1;32m\]\u@runpod\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\]\$ '
+
+alias ll='ls -alh'
+alias comfy='cd /opt/ComfyUI'
+alias comfy-log='tail -n 200 -f /var/log/comfyui.log'
+alias gpu='nvtop'
