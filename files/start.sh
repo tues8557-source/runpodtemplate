@@ -33,9 +33,11 @@ if [ -n "${PUBLIC_KEY:-}" ]; then
 fi
 
 # 4) JupyterLab (포트 8888)
-#    JUPYTER_PASSWORD를 넣으면 그 비밀번호로 로그인, 비워두면 로그인 없이 바로 열림
+#    기본: 로그인 없이 실행. JUPYTER_PASSWORD는 RunPod의 Ready 확인용으로만 넣어도 됨
+#    로그인을 켜려면 JUPYTER_REQUIRE_LOGIN=1 + JUPYTER_PASSWORD
 if [ "${JUPYTER_ENABLE:-1}" = "1" ]; then
-    if [ -n "${JUPYTER_PASSWORD:-}" ]; then
+    if [ "${JUPYTER_REQUIRE_LOGIN:-0}" = "1" ] && [ -n "${JUPYTER_PASSWORD:-}" ]; then
+        echo "=== Jupyter 비밀번호 로그인 사용 ==="
         jupyter lab --IdentityProvider.token="$JUPYTER_PASSWORD" &
     else
         echo "=== Jupyter 로그인 없이 실행 ==="
