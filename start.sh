@@ -43,13 +43,25 @@ if [ "${JUPYTER_ENABLE:-1}" = "1" ]; then
 fi
 
 # 5) ComfyUI (포트 8188) — 꺼지면 5초 뒤 자동 재시작
+# RunPod 콘솔에서 링크로 열 때 생기는 403(교차 사이트 차단)을 끄기 위해 CORS 옵션 사용.
+# 허용 출처는 이 Pod 자신의 주소로만 제한. 끄려면 COMFYUI_ALLOW_CROSS_SITE=0
+CORS_ARGS=""
+if [ "${COMFYUI_ALLOW_CROSS_SITE:-1}" = "1" ]; then
+    if [ -n "${RUNPOD_POD_ID:-}" ]; then
+        CORS_ARGS="--enable-cors-header https://${RUNPOD_POD_ID}-8188.proxy.runpod.net"
+    else
+        CORS_ARGS="--enable-cors-header"
+    fi
+    echo "=== ComfyUI 교차 사이트 차단 해제: $CORS_ARGS ==="
+fi
+
 if [ "${COMFYUI_AUTOSTART:-1}" = "1" ]; then
     (
         cd "$COMFY"
         while true; do
             python main.py --listen 0.0.0.0 --port 8188 \
                 --enable-manager --use-sage-attention \
-                ${COMFYUI_ARGS:-}
+                $CORS_ARGS ${COMFYUI_ARGS:-}
             echo "=== ComfyUI 종료됨, 5초 후 재시작 ==="
             sleep 5
         done
