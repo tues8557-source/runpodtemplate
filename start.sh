@@ -33,12 +33,14 @@ if [ -n "${PUBLIC_KEY:-}" ]; then
 fi
 
 # 4) JupyterLab (포트 8888)
+#    JUPYTER_PASSWORD를 넣으면 그 비밀번호로 로그인, 비워두면 로그인 없이 바로 열림
 if [ "${JUPYTER_ENABLE:-1}" = "1" ]; then
     if [ -n "${JUPYTER_PASSWORD:-}" ]; then
         jupyter lab --IdentityProvider.token="$JUPYTER_PASSWORD" &
     else
-        echo "!!! JUPYTER_PASSWORD가 없어 임시 토큰을 생성합니다. 아래 로그의 token= 값을 사용하세요."
-        jupyter lab &
+        echo "=== Jupyter 로그인 없이 실행 ==="
+        jupyter lab --IdentityProvider.token="" \
+            --PasswordIdentityProvider.hashed_password="" &
     fi
 fi
 
