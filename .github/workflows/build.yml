@@ -38,6 +38,11 @@ jobs:
           context: .
           platforms: linux/amd64
           push: true
+          build-args: |
+            CACHE_BUST=${{ github.run_number }}
+          # 빌드 캐시를 Docker Hub의 buildcache 태그에 저장 → 다음 빌드에서 안 바뀐 레이어 재사용
+          cache-from: type=registry,ref=${{ env.IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.IMAGE }}:buildcache,mode=max,image-manifest=true,oci-mediatypes=true
           tags: |
             ${{ env.IMAGE }}:latest
             ${{ env.IMAGE }}:${{ github.run_number }}
