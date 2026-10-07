@@ -7,6 +7,12 @@ DATA="${COMFY_DATA_DIR:-/workspace/runpod-slim/ComfyUI}"
 
 echo "=== 데이터 폴더: $DATA ==="
 
+# 0) RunPod가 부여한 이름 없는 그룹 ID 등록
+#    (터미널을 열 때 "groups: cannot find name for group ID ..." 경고 제거)
+for gid in $(id -G); do
+    getent group "$gid" >/dev/null 2>&1 || groupadd -g "$gid" "hostgroup$gid" 2>/dev/null || true
+done
+
 # 1) 모델·입력·출력·사용자설정을 네트워크 볼륨으로 연결
 #    → RunpodDirect, Civicomfy, 매니저가 받는 모델도 자동으로 볼륨에 저장됨
 mkdir -p "$DATA"
@@ -32,17 +38,17 @@ if [ -n "${PUBLIC_KEY:-}" ]; then
     /usr/sbin/sshd && echo "=== SSH 시작 ==="
 fi
 
-# 4) JupyterLab (포트 8888)
+# 4) JupyterLab (포트 8888) — /workspace에서 실행해야 새 터미널도 /workspace에서 시작
 #    기본: 로그인 없이 실행. JUPYTER_PASSWORD는 RunPod의 Ready 확인용으로만 넣어도 됨
 #    로그인을 켜려면 JUPYTER_REQUIRE_LOGIN=1 + JUPYTER_PASSWORD
 if [ "${JUPYTER_ENABLE:-1}" = "1" ]; then
     if [ "${JUPYTER_REQUIRE_LOGIN:-0}" = "1" ] && [ -n "${JUPYTER_PASSWORD:-}" ]; then
         echo "=== Jupyter 비밀번호 로그인 사용 ==="
-        jupyter lab --IdentityProvider.token="$JUPYTER_PASSWORD" &
+        ( cd /workspace && jupyter lab --IdentityProvider.token="$JUPYTER_PASSWORD" ) &
     else
         echo "=== Jupyter 로그인 없이 실행 ==="
-        jupyter lab --IdentityProvider.token="" \
-            --PasswordIdentityProvider.hashed_password="" &
+        ( cd /workspace && jupyter lab --IdentityProvider.token="" \
+            --PasswordIdentityProvider.hashed_password="" ) &
     fi
 fi
 
