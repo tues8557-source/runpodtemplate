@@ -65,12 +65,19 @@ if [ "${COMFYUI_ALLOW_CROSS_SITE:-1}" = "1" ]; then
     echo "=== ComfyUI 교차 사이트 차단 해제: $CORS_ARGS ==="
 fi
 
+# 매니저 화면: 기본은 예전(레거시) 화면 — 메뉴에 Restart 버튼이 있음
+# 새 화면을 쓰려면 MANAGER_LEGACY_UI=0
+MANAGER_ARGS="--enable-manager"
+if [ "${MANAGER_LEGACY_UI:-1}" = "1" ]; then
+    MANAGER_ARGS="--enable-manager --enable-manager-legacy-ui"
+fi
+
 if [ "${COMFYUI_AUTOSTART:-1}" = "1" ]; then
     (
         cd "$COMFY"
         while true; do
             python main.py --listen 0.0.0.0 --port 8188 \
-                --enable-manager --use-sage-attention \
+                $MANAGER_ARGS --use-sage-attention \
                 $CORS_ARGS ${COMFYUI_ARGS:-}
             echo "=== ComfyUI 종료됨, 5초 후 재시작 ==="
             sleep 5
