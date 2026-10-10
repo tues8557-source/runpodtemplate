@@ -108,13 +108,9 @@ RUN echo "build ${CACHE_BUST}" \
     && uv pip install -c /opt/constraints.txt -r requirements.txt -r manager_requirements.txt \
     && uv pip install -c /opt/constraints.txt "comfy-kitchen[cublas]"
 
-# [레이어 6] 커스텀 노드 (여기에 줄을 추가하면 이미지에 영구 포함)
-RUN cd /opt/ComfyUI/custom_nodes \
-    && git clone --depth 1 https://github.com/MadiatorLabs/ComfyUI-RunpodDirect.git \
-    && git clone --depth 1 https://github.com/MoonGoblinDev/Civicomfy.git \
-    && for d in */; do \
-         if [ -f "$d/requirements.txt" ]; then uv pip install -c /opt/constraints.txt -r "$d/requirements.txt"; fi; \
-       done
+# [레이어 6] 커스텀 노드 — files/custom_nodes.txt 목록대로 설치
+COPY files/custom_nodes.txt files/install_nodes.sh /tmp/nodes/
+RUN bash /tmp/nodes/install_nodes.sh /tmp/nodes/custom_nodes.txt && rm -rf /tmp/nodes
 
 # [레이어 7] 시작 스크립트와 설정 — 몇 KB
 COPY files/start.sh /start.sh
