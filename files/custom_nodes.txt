@@ -7,6 +7,7 @@
 
 https://github.com/MadiatorLabs/ComfyUI-RunpodDirect
 https://github.com/MoonGoblinDev/Civicomfy
+https://github.com/felipecaninnovaes/ComfyUI-GGUF
 
 # 자주 쓰이는 노드 예시 — 필요하면 # 지우기
 # https://github.com/kijai/ComfyUI-KJNodes
