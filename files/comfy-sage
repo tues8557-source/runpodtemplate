@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# SageAttention 켜기/끄기 + ComfyUI 재시작
+#   comfy-sage          현재 상태 보기
+#   comfy-sage off      끄고 ComfyUI 재시작
+#   comfy-sage on       켜고 ComfyUI 재시작
+#   comfy-restart       설정 그대로 ComfyUI만 재시작
+SAGE_FILE=/tmp/comfy_sage
+
+restart_comfy() {
+    if pkill -f "python main.py --listen" ; then
+        echo "ComfyUI를 재시작합니다. 몇 초 뒤 브라우저를 새로고침하세요. (로그: comfy-log)"
+    else
+        echo "실행 중인 ComfyUI가 없습니다. (COMFYUI_AUTOSTART=0 이면 직접 실행해야 합니다)"
+    fi
+}
+
+status() {
+    if [ "$(cat "$SAGE_FILE" 2>/dev/null)" = "1" ]; then
+        echo "SageAttention 설정: 켜짐"
+    else
+        echo "SageAttention 설정: 꺼짐"
+    fi
+    if pgrep -af "python main.py --listen" | grep -q -- "--use-sage-attention"; then
+        echo "지금 실행 중인 ComfyUI: 켜진 상태로 실행 중"
+    elif pgrep -f "python main.py --listen" >/dev/null; then
+        echo "지금 실행 중인 ComfyUI: 꺼진 상태로 실행 중"
+    fi
+}
+
+case "$(basename "$0"):${1:-}" in
+    comfy-restart:*) restart_comfy ;;
+    *:off|*:0)       echo 0 > "$SAGE_FILE"; echo "SageAttention 끔"; restart_comfy ;;
+    *:on|*:1)        echo 1 > "$SAGE_FILE"; echo "SageAttention 켬"; restart_comfy ;;
+    *:)              status ;;
+    *)               echo "사용법: comfy-sage [on|off]" ; exit 1 ;;
+esac

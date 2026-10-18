@@ -72,15 +72,28 @@ if [ "${MANAGER_LEGACY_UI:-1}" = "1" ]; then
     MANAGER_ARGS="--enable-manager --enable-manager-legacy-ui"
 fi
 
+# SageAttention: 기본 켜짐. 끄려면 템플릿 환경변수 COMFYUI_SAGE_ATTENTION=0
+# 실행 중에는 터미널에서 `comfy-sage off` / `comfy-sage on` 으로 바꿀 수 있음
+# (그 설정은 /tmp/comfy_sage 에 저장되어 Pod를 다시 켜면 환경변수 값으로 돌아감)
+SAGE_FILE=/tmp/comfy_sage
+[ -f "$SAGE_FILE" ] || echo "${COMFYUI_SAGE_ATTENTION:-1}" > "$SAGE_FILE"
+
 if [ "${COMFYUI_AUTOSTART:-1}" = "1" ]; then
     (
         cd "$COMFY"
         while true; do
+            SAGE_ARGS=""
+            if [ "$(cat "$SAGE_FILE" 2>/dev/null)" = "1" ]; then
+                SAGE_ARGS="--use-sage-attention"
+                echo "=== SageAttention: 켜짐 ==="
+            else
+                echo "=== SageAttention: 꺼짐 (PyTorch 기본 attention) ==="
+            fi
             python main.py --listen 0.0.0.0 --port 8188 \
-                $MANAGER_ARGS --use-sage-attention \
+                $MANAGER_ARGS $SAGE_ARGS \
                 $CORS_ARGS ${COMFYUI_ARGS:-}
-            echo "=== ComfyUI 종료됨, 5초 후 재시작 ==="
-            sleep 5
+            echo "=== ComfyUI 종료됨, 3초 후 재시작 ==="
+            sleep 3
         done
     ) 2>&1 | tee -a /var/log/comfyui.log &
 fi

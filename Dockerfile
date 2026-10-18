@@ -116,7 +116,10 @@ RUN bash /tmp/nodes/install_nodes.sh /tmp/nodes/custom_nodes.txt && rm -rf /tmp/
 COPY files/start.sh /start.sh
 COPY files/jupyter_server_config.py /root/.jupyter/jupyter_server_config.py
 COPY files/bashrc_extra /tmp/bashrc_extra
-RUN chmod +x /start.sh && cat /tmp/bashrc_extra >> /root/.bashrc && rm /tmp/bashrc_extra
+COPY files/comfy-sage /usr/local/bin/comfy-sage
+RUN chmod +x /start.sh /usr/local/bin/comfy-sage \
+    && ln -sf /usr/local/bin/comfy-sage /usr/local/bin/comfy-restart \
+    && cat /tmp/bashrc_extra >> /root/.bashrc && rm /tmp/bashrc_extra
 
 WORKDIR /opt/ComfyUI
 EXPOSE 8188 8888 22

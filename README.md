@@ -27,6 +27,7 @@
   - `CIVITAI_API_KEY`: Civitai API 키 (Civicomfy가 자동 인식)
   - `COMFY_DATA_DIR`: 모델이 들어있는 폴더의 상위 경로 (기본 `/workspace/runpod-slim/ComfyUI`)
   - `COMFYUI_ARGS`: ComfyUI 추가 실행 옵션 (선택)
+  - `COMFYUI_SAGE_ATTENTION`: `1`(기본) 켬 / `0` 끔 — 4090 + Qwen Edit처럼 이미지가 검게 나올 때 `0`
 - Pod 배포 시 CUDA 버전 필터를 13.0 이상으로 설정
 
 ## 3. 폴더 구조
@@ -41,5 +42,9 @@
 ## 참고
 - 매니저로 설치한 커스텀 노드는 Pod를 끄면 사라집니다. 계속 쓸 노드는 Dockerfile의
   커스텀 노드 부분에 `git clone` 줄을 추가하고 다시 빌드하세요.
-- 특정 모델에서 결과가 검게 나오는 등 이상하면 `--use-sage-attention`이 원인일 수 있습니다.
-  start.sh에서 해당 옵션을 빼고 테스트해 보세요.
+- 특정 모델에서 결과가 검게 나오는 등 이상하면 SageAttention이 원인일 수 있습니다.
+  Pod를 끄지 않고 Jupyter 터미널에서 바로 바꿀 수 있습니다.
+  - `comfy-sage off` : 끄고 ComfyUI 재시작 (몇 초 뒤 브라우저 새로고침)
+  - `comfy-sage on`  : 다시 켜고 재시작
+  - `comfy-sage`     : 현재 상태 확인 / `comfy-restart` : 설정 그대로 재시작
+  - 터미널에서 바꾼 값은 Pod를 다시 켜면 `COMFYUI_SAGE_ATTENTION` 값으로 돌아갑니다.
